@@ -96,7 +96,8 @@
                     </div>
 
                     <input type="hidden" id="marketerField" name="marketer">
-                    <input type="hidden" id="paypalTxField" name="paypal_tx_id"> <div class="form-group">
+
+                    <div class="form-group">
                         <label for="payerEmail">Your PayPal Email *</label>
                         <input type="email" id="payerEmail" name="payerEmail" required placeholder="Email you used for payment...">
                     </div>
@@ -172,29 +173,18 @@
         }
       }
 
-      // 1. Populate ALL hidden fields on page load
-      (function populateHiddenFields() {
+      // 1. Populate the hidden marketer field on page load
+      (function populateMarketerField() {
         try {
-          // 1a. Get Marketer from Cookie
           const marketerName = getStoredMarketer() || 'Direct';
           const marketerField = document.getElementById('marketerField');
           if (marketerField) {
             marketerField.value = marketerName;
           }
-
-          // 1b. Get PayPal TX ID from URL
-          const urlParams = new URLSearchParams(window.location.search);
-          const txId = urlParams.get('tx'); // 'tx' is the parameter PayPal adds
-          const paypalTxField = document.getElementById('paypalTxField');
-          if (paypalTxField && txId) {
-            paypalTxField.value = txId;
-          }
-
         } catch (e) {
-          console.warn('OPTILINE: Error populating hidden fields.', e);
+          console.warn('OPTILINE: Error populating marketer field.');
         }
       })();
-
 
       // 2. Add the submit listener for the form
       window.addEventListener('load', function() {
@@ -207,15 +197,19 @@
                   submitButton.disabled = true;
 
                   // ==========================================================
-                  // === !!! هذا هو الرابط الصحيح الآن !!! ===
+                  // === !!! تم الدمج !!! ===
                   // ==========================================================
+                  // 1. هذا هو الرابط الصحيح الذي أدخلته
                   const BRIEF_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbw6VPYwGdA3UiwaSJRS-6L2qoUzyg3FqFbTqbggErKrFp0UwWMcfXcDuVK-pa7LE_cU/exec"; 
                   
+                  // 2. تأكد من أن هذا الرمز السري يطابق الرمز في SCRIPT 2
                   const BRIEF_SECRET = "MY_BRIEF_FORM_SECRET_987"; 
                   
                   // ==========================================================
 
-                  // === !!! تم حذف الشرط الخاطئ بنجاح !!! ===
+                  // === !!! تم الحذف !!! ===
+                  // تم حذف الشرط "if" الذي كان يسبب الخطأ
+                  // (if (BRIEF_WEBHOOK_URL === ...))
                   
                   const formData = new FormData(form);
                   const payload = new URLSearchParams(formData);
