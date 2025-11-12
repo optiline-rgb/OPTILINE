@@ -69,6 +69,9 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* small accessibility */
+        .char-counter { min-width: 48px; }
     </style>
 </head>
 <body>
@@ -106,18 +109,18 @@
             <div class="container">
                 <div class="contact-wrapper anim-group">
                     
-                    <form class="contact-form" name="contact" method="POST" id="contact-form">
+                    <form class="contact-form" name="contact" method="POST" id="contact-form" novalidate>
                         <h2>Project Inquiry</h2>
                         
                         <div class="form-group">
                             <label for="name">Full Name *</label>
-                            <input type="text" id="name" name="name" required maxlength="100">
-                            <div class="char-counter" style="font-size: 12px; color: #666; text-align: right;"></div>
+                            <input type="text" id="name" name="name" required maxlength="100" autocomplete="name">
+                            <div class="char-counter" style="font-size: 12px; color: #666; text-align: right;">0/100</div>
                         </div>
                         
                         <div class="form-group">
                             <label for="email">Email Address *</label>
-                            <input type="email" id="email" name="email" required>
+                            <input type="email" id="email" name="email" required autocomplete="email">
                         </div>
                         
                         <div class="form-group">
@@ -128,13 +131,13 @@
                         <div class="form-group">
                             <label for="message">How can we help? *</label>
                             <textarea id="message" name="message" required placeholder="Tell us what's on your mind or what you'd like to discuss..." maxlength="1000" rows="5"></textarea>
-                            <div class="char-counter" style="font-size: 12px; color: #666; text-align: right;"></div>
+                            <div class="char-counter" style="font-size: 12px; color: #666; text-align: right;">0/1000</div>
                         </div>
                         
                         <!-- HONEY POT FIELDS - Hidden from humans -->
                         <div class="honeypot-field" aria-hidden="true">
                             <label for="website">Leave this field blank</label>
-                            <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                            <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" value="">
                         </div>
                         
                         <div class="honeypot-field" aria-hidden="true">
@@ -145,7 +148,7 @@
                         <div class="form-submit-container">
                             <button type="submit" class="cta-button" id="submit-button" disabled>
                                 <div class="submit-content">
-                                    <div class="loading-spinner" id="loading-spinner"></div>
+                                    <div class="loading-spinner" id="loading-spinner" aria-hidden="true"></div>
                                     <span id="submit-text">Submit Inquiry</span>
                                 </div>
                             </button>
@@ -227,11 +230,11 @@
     
     <script src="../assets/js/main.js"></script>
 
+    <!-- UPDATED CONTACT SCRIPT: integrates one-time token, honeypot, 2-minute throttle, and UI states -->
     <script>
       document.addEventListener('DOMContentLoaded', function() {
+        // Replace with your deployed Web App URL if different
         const CONTACT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyZy7CMOcoQrtkzltrSQEzCKww7_SyfOxsaNK1J31S0Qzkb9-uRfDAQ7EtSA2urPErA/exec";
-        let lastSubmissionTime = 0;
-        const MIN_SUBMISSION_INTERVAL = 120000; // 2 minutes in milliseconds
 
         const form = document.getElementById('contact-form');
         const submitButton = document.getElementById('submit-button');
@@ -240,160 +243,203 @@
         const successMessage = document.getElementById('form-success');
         const errorMessage = document.getElementById('form-error');
 
-        // Enable submit button after short delay (anti-bot)
-        setTimeout(() => {
-            submitButton.disabled = false;
-        }, 1000);
-
-        // Character counters
         const nameInput = document.getElementById('name');
         const messageInput = document.getElementById('message');
-        
+
+        const websiteField = document.getElementById('website'); // honeypot visible only to bots
+        const honeypotField = document.getElementById('honeypot'); // expected-value field
+
+        const CLIENT_RL_KEY = 'contact_last_sent_ts';
+        const MIN_SUBMISSION_INTERVAL = 120000; // 2 minutes in milliseconds
+
+        let currentToken = ''; // one-time token fetched from Apps Script
+
+        // initialize counters
+        document.querySelectorAll('.char-counter').forEach(function(c){
+          if (c.textContent.trim() === '') c.textContent = '0/0';
+        });
+        // set proper initial counters
+        const nameCounter = nameInput ? nameInput.parentNode.querySelector('.char-counter') : null;
+        if (nameCounter) nameCounter.textContent = '0/100';
+        const msgCounter = messageInput ? messageInput.parentNode.querySelector('.char-counter') : null;
+        if (msgCounter) msgCounter.textContent = '0/1000';
+
+        // Character counters
         if (nameInput) {
             nameInput.addEventListener('input', function() {
                 const counter = this.parentNode.querySelector('.char-counter');
-                counter.textContent = `${this.value.length}/100`;
+                if (counter) counter.textContent = `${this.value.length}/100`;
             });
         }
         
         if (messageInput) {
             messageInput.addEventListener('input', function() {
                 const counter = this.parentNode.querySelector('.char-counter');
-                counter.textContent = `${this.value.length}/1000`;
+                if (counter) counter.textContent = `${this.value.length}/1000`;
             });
         }
 
-        if (form) {
-          form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // fetch initial token, enable submit when token present
+        (async function initToken(){
+          await fetchToken();
+          // as additional anti-bot: small delay before enabling if token present
+          if (currentToken) {
+            setTimeout(()=> { submitButton.disabled = false; }, 250);
+          } else {
+            // token failed: enable button so user can refresh or retry manually
+            setTimeout(()=> { submitButton.disabled = false; }, 1500);
+          }
+        })();
 
-            const now = Date.now();
-            if (now - lastSubmissionTime < MIN_SUBMISSION_INTERVAL) {
-                showError(`Please wait 2 minutes between submissions.`);
-                return;
+        async function fetchToken(retries = 2) {
+          try {
+            const res = await fetch(CONTACT_WEBHOOK_URL + '?mode=getToken', { cache: 'no-store' });
+            if (!res.ok) throw new Error('Token endpoint error');
+            const json = await res.json();
+            if (json && json.status === 'ok' && json.token) {
+              currentToken = json.token;
+              return true;
+            } else {
+              throw new Error(json && json.message ? json.message : 'Invalid token response');
             }
-
-            // Client-side validation
-            if (!validateForm()) {
-                return;
+          } catch (err) {
+            console.warn('fetchToken error:', err);
+            if (retries > 0) {
+              // small backoff
+              await new Promise(res => setTimeout(res, 700));
+              return fetchToken(retries - 1);
             }
-
-            // Show loading state
-            submitButton.disabled = true;
-            loadingSpinner.style.display = 'inline-block';
-            submitText.textContent = 'Submitting...';
-
-            successMessage.style.display = 'none';
-            errorMessage.style.display = 'none';
-
-            const formData = new FormData(form);
-            
-            // Add client IP (approximate) and timestamp
-            formData.append('timestamp', new Date().toISOString());
-            formData.append('userAgent', navigator.userAgent);
-
-            try {
-              const response = await fetch(CONTACT_WEBHOOK_URL, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                  'X-Requested-With': 'XMLHttpRequest'
-                }
-              });
-
-              const result = await response.json();
-
-              if (result.status === 'success') {
-                lastSubmissionTime = Date.now();
-                showSuccess(result.message);
-                form.reset();
-                resetCharCounters();
-                
-                // Disable button for 2 minutes
-                submitButton.disabled = true;
-                startCooldownTimer();
-                
-              } else {
-                throw new Error(result.message || 'Unknown error occurred.');
-              }
-            } catch (err) {
-              console.error('Contact Form Error:', err);
-              showError(err.message);
-              submitButton.disabled = false;
-            } finally {
-              loadingSpinner.style.display = 'none';
-              submitText.textContent = 'Submit Inquiry';
-            }
-          });
+            return false;
+          }
         }
 
-        function validateForm() {
-            const telegram = document.getElementById('telegram').value;
-            const telegramRegex = /^(@[a-zA-Z0-9_]+|\+[0-9]+)$/;
-            
-            if (!telegramRegex.test(telegram)) {
-                showError('Please enter a valid Telegram username (@username) or phone number (+1234567890)');
-                return false;
+        form.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          hideMessages();
+
+          // client-side throttle check (localStorage)
+          const lastTs = localStorage.getItem(CLIENT_RL_KEY);
+          if (lastTs && (Date.now() - parseInt(lastTs,10) < MIN_SUBMISSION_INTERVAL)) {
+            const waitMs = MIN_SUBMISSION_INTERVAL - (Date.now() - parseInt(lastTs,10));
+            showError('Please wait 2 minutes before submitting again.');
+            return;
+          }
+
+          // honeypot validation
+          if ((websiteField && websiteField.value.trim() !== '') || (honeypotField && honeypotField.value.trim() !== 'expected-value')) {
+            showError('Security validation failed. Refresh the page and try again.');
+            return;
+          }
+
+          // basic client validation: telegram pattern
+          const telegram = document.getElementById('telegram').value || '';
+          const telegramRegex = /^(@[a-zA-Z0-9_]+|\+[0-9]+)$/;
+          if (!telegramRegex.test(telegram)) {
+            showError('Please enter a valid Telegram username (@username) or phone number (+1234567890).');
+            return;
+          }
+
+          // ensure token
+          if (!currentToken) {
+            const ok = await fetchToken();
+            if (!ok || !currentToken) {
+              showError('Security initialization failed. Reload the page and try again.');
+              return;
             }
-            
-            // Check honey pot fields (should be empty or have expected value)
-            const websiteField = document.getElementById('website').value;
-            const honeypotField = document.getElementById('honeypot').value;
-            
-            if (websiteField.trim() !== "" || honeypotField !== "expected-value") {
-                showError('Security validation failed. Please refresh the page and try again.');
-                return false;
-            }
-            
-            return true;
-        }
+          }
 
-        function showSuccess(message) {
-            successMessage.textContent = message;
-            successMessage.style.display = 'block';
-            errorMessage.style.display = 'none';
-        }
+          // UI: show loading
+          submitButton.disabled = true;
+          loadingSpinner.style.display = 'inline-block';
+          submitText.textContent = 'Submitting...';
 
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
-            successMessage.style.display = 'none';
-        }
+          // build form data including token
+          const fd = new FormData(form);
+          fd.append('token', currentToken);
+          // optional: include user agent and timestamp for server logs
+          fd.append('userAgent', navigator.userAgent);
+          fd.append('ts', new Date().toISOString());
 
-        function resetCharCounters() {
-            const counters = document.querySelectorAll('.char-counter');
-            counters.forEach(counter => {
-                counter.textContent = '0/100';
+          try {
+            const resp = await fetch(CONTACT_WEBHOOK_URL, {
+              method: 'POST',
+              body: fd,
+              // do not set content-type — browser will set multipart/form-data boundary
             });
-        }
 
-        function startCooldownTimer() {
-            let timeLeft = 120; // 2 minutes
-            const timerInterval = setInterval(() => {
-                timeLeft--;
-                submitText.textContent = `Wait ${timeLeft}s`;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    submitButton.disabled = false;
-                    submitText.textContent = 'Submit Inquiry';
-                }
-            }, 1000);
-        }
+            const json = await resp.json();
 
-        // Additional anti-bot protection
-        form.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const focusableElements = form.querySelectorAll('input, textarea, button');
-                const currentIndex = Array.from(focusableElements).indexOf(document.activeElement);
-                const nextIndex = (currentIndex + 1) % focusableElements.length;
-                
-                if (focusableElements[nextIndex].type !== 'submit') {
-                    focusableElements[nextIndex].focus();
-                    e.preventDefault();
-                }
+            // server returns {status: 'ok', ...}
+            if (json && (json.status === 'ok' || json.status === 'success')) {
+              // success
+              form.reset();
+              localStorage.setItem(CLIENT_RL_KEY, Date.now().toString());
+              showSuccess('Your message has been sent successfully. We will contact you shortly.');
+              startLocalCooldown();
+              // prepare new token for next submission
+              currentToken = '';
+              fetchToken().catch(()=>{});
+            } else {
+              // server returned an error
+              const message = (json && json.message) ? json.message : 'Server rejected the submission.';
+              throw new Error(message);
             }
+          } catch (err) {
+            console.error('Submit error:', err);
+            showError(err.message || 'Submission failed. Try again later.');
+            submitButton.disabled = false;
+          } finally {
+            loadingSpinner.style.display = 'none';
+            submitText.textContent = 'Submit Inquiry';
+          }
         });
+
+        function startLocalCooldown() {
+          let remaining = 120;
+          submitButton.disabled = true;
+          const iv = setInterval(() => {
+            submitText.textContent = `Wait ${remaining}s`;
+            remaining--;
+            if (remaining <= 0) {
+              clearInterval(iv);
+              submitText.textContent = 'Submit Inquiry';
+              submitButton.disabled = false;
+            }
+          }, 1000);
+        }
+
+        function hideMessages() {
+          successMessage.style.display = 'none';
+          errorMessage.style.display = 'none';
+        }
+
+        function showSuccess(msg) {
+          successMessage.textContent = msg;
+          successMessage.style.display = 'block';
+          errorMessage.style.display = 'none';
+        }
+
+        function showError(msg) {
+          errorMessage.textContent = msg;
+          errorMessage.style.display = 'block';
+          successMessage.style.display = 'none';
+        }
+
+        // Prevent Enter from submitting unexpectedly: move focus instead
+        form.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter' && e.target.tagName.toLowerCase() !== 'textarea') {
+            const focusable = Array.from(form.querySelectorAll('input, textarea, button')).filter(el => !el.disabled && el.type !== 'hidden');
+            const idx = focusable.indexOf(document.activeElement);
+            if (idx >= 0) {
+              const next = focusable[(idx + 1) % focusable.length];
+              if (next && next !== submitButton) {
+                next.focus();
+                e.preventDefault();
+              }
+            }
+          }
+        });
+
       });
     </script>
 
