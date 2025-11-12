@@ -1,447 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us | OPTILINE Agency</title>
-    
-    <meta name="description" content="Get in touch with OPTILINE to start your next project. Contact us for a free consultation on branding, design, and video production services.">
-    <meta name="referrer" content="no-referrer-when-downgrade">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="canonical" href="https://optiline.online/contact/">
-
-    <link rel="icon" type="image/webp" href="https://i.ibb.co/jvhxGcxT/FAV-3.webp">
-
-    <meta property="og:url" content="https://optiline.online/contact/">
-    <meta property="og:title" content="Contact Us | OPTILINE Agency">
-    <meta property="og:description" content="Ready to start your next project? We'd love to hear from you.">
-    <meta property="og:image" content="https://i.ibb.co/ZpvD9mSj/OPTILINE-LOGO.webp">
-    
-    <meta property="twitter:url" content="https://optiline.online/contact/">
-    <meta property="twitter:title" content="Contact Us | OPTILINE Agency">
-    <meta property="twitter:description" content="Ready to start your next project? We'd love to hear from you.">
-    <meta property="twitter:image" content="https://i.ibb.co/ZpvD9mSj/OPTILINE-LOGO.webp">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="../assets/css/style.css">
-    
-    <style>
-        .security-features {
-            background: rgba(0, 124, 186, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            border-left: 4px solid #007cba;
-        }
-        
-        .honeypot-field {
-            opacity: 0;
-            position: absolute;
-            left: -10000px;
-            top: -10000px;
-        }
-        
-        .loading-spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #007cba;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .submit-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* small accessibility */
-        .char-counter { min-width: 48px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us | OPTILINE Agency</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<style>
+  .honeypot-field {
+    opacity: 0;
+    position: absolute;
+    left: -9999px;
+  }
+  .loading-spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007cba;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+  }
+  @keyframes spin { 0% {transform:rotate(0deg);} 100% {transform:rotate(360deg);} }
+  .form-messages {
+    margin-top: 20px; /* extra space between button and messages */
+    text-align: center;
+  }
+  #form-success {
+    display: none;
+    color: #00cc66;
+    background: rgba(0,255,0,0.08);
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+  #form-error {
+    display: none;
+    color: #ff4444;
+    background: rgba(255,0,0,0.08);
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+</style>
 </head>
 <body>
-    <div class="custom-cursor"></div>
-    
+<main>
+  <section id="contact">
+    <div class="container">
+      <form id="contact-form" class="contact-form" method="POST" novalidate>
+        <h2>Project Inquiry</h2>
 
-    <header class="main-header" id="header">
-        <a href="/home/" class="logo"><img src="https://i.ibb.co/ZpvD9mSj/OPTILINE-LOGO.webp" alt="OPTILINE Logo"></a>
-        <nav>
-            <ul class="nav-links">
-                <li><a href="/home/">Home</a></li>
-                <li><a href="/services/">Services</a></li>
-                <li><a href="/portfolio/">Portfolio</a></li>
-                <li><a href="/pricing/">Pricing</a></li>
-                <li><a href="/contact/" class="active">Contact</a></li>
-            </ul>
-        </nav>
-        <div class="hamburger"><div class="bar1"></div><div class="bar2"></div><div class="bar3"></div></div>
-    </header>
+        <label for="name">Full Name *</label>
+        <input type="text" id="name" name="name" required maxlength="100">
 
-    <main>
-        <section class="page-hero">
-            <div class="container anim-group">
-                <h1 class="subtle-glow">CONNECT WITH THE COLLECTIVE</h1>
-                <p>This is our central hub. For general inquiries, questions, or to learn more about our process, our team is ready to respond.</p>
-                
-                <div class="security-features">
-                    <h4 style="margin-top: 0; color: #007cba;"><i class="fas fa-shield-alt"></i> Secure & Protected</h4>
-                    <p style="margin-bottom: 0; font-size: 14px;">Your information is protected with enterprise-grade security including anti-spam protection and encrypted transmission.</p>
-                </div>
-            </div>
-        </section>
+        <label for="email">Email Address *</label>
+        <input type="email" id="email" name="email" required>
 
-        <section class="section" id="contact">
-            <div class="container">
-                <div class="contact-wrapper anim-group">
-                    
-                    <form class="contact-form" name="contact" method="POST" id="contact-form" novalidate>
-                        <h2>Project Inquiry</h2>
-                        
-                        <div class="form-group">
-                            <label for="name">Full Name *</label>
-                            <input type="text" id="name" name="name" required maxlength="100" autocomplete="name">
-                            <div class="char-counter" style="font-size: 12px; color: #666; text-align: right;">0/100</div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="email">Email Address *</label>
-                            <input type="email" id="email" name="email" required autocomplete="email">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="telegram">Telegram *</label>
-                            <input type="text" id="telegram" name="telegram" placeholder="@username or +1234567890" required pattern="^(@[a-zA-Z0-9_]+|\+[0-9]+)$" title="Please enter a valid Telegram username starting with @ or phone number starting with +">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="message">How can we help? *</label>
-                            <textarea id="message" name="message" required placeholder="Tell us what's on your mind or what you'd like to discuss..." maxlength="1000" rows="5"></textarea>
-                            <div class="char-counter" style="font-size: 12px; color: #666; text-align: right;">0/1000</div>
-                        </div>
-                        
-                        <!-- HONEY POT FIELDS - Hidden from humans -->
-                        <div class="honeypot-field" aria-hidden="true">
-                            <label for="website">Leave this field blank</label>
-                            <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" value="">
-                        </div>
-                        
-                        <div class="honeypot-field" aria-hidden="true">
-                            <label for="honeypot">Don't fill this</label>
-                            <input type="text" id="honeypot" name="honeypot" value="expected-value" tabindex="-1" autocomplete="off">
-                        </div>
+        <label for="telegram">Telegram *</label>
+        <input type="text" id="telegram" name="telegram" placeholder="@username or +1234567890" required pattern="^(@[a-zA-Z0-9_]+|\+[0-9]+)$">
 
-                        <div class="form-submit-container">
-                            <button type="submit" class="cta-button" id="submit-button" disabled>
-                                <div class="submit-content">
-                                    <div class="loading-spinner" id="loading-spinner" aria-hidden="true"></div>
-                                    <span id="submit-text">Submit Inquiry</span>
-                                </div>
-                            </button>
-                            
-                            <div class="form-messages">
-                                <div id="form-success" style="display: none; color: var(--accent-light); text-align: center; margin-top: 15px; padding: 15px; background: rgba(0,255,0,0.1); border-radius: 5px; font-weight: bold;"></div>
-                                <div id="form-error" style="display: none; color: #ff6b6b; text-align: center; margin-top: 15px; padding: 15px; background: rgba(255,0,0,0.1); border-radius: 5px;"></div>
-                            </div>
-                        </div>
-                    </form>
+        <label for="message">Message *</label>
+        <textarea id="message" name="message" rows="5" maxlength="1000" required></textarea>
 
-                    <div class="contact-info">
-                        <h3>Headquarters & Contact</h3>
-                        <p style="color: var(--text-gray); margin-bottom: 2rem;">Feel free to reach out via email, phone, or follow us on our social channels.</p>
-                        <div class="info-item"><i class="fas fa-map-marker-alt info-icon"></i><div><strong>Strategy Hub</strong><br>London, New York, and Remote Teams</div></div>
-                        <div class="info-item"><i class="fas fa-envelope info-icon"></i><div><strong>Email Us</strong><br>hello@optiline.online</div></div>
-                        <div class="info-item"><i class="fas fa-phone info-icon"></i><div><strong>Project Line</strong><br>(555) 123-4567</div></div>
-                        <div class="social-icons">
-                            <a href="https://twitter.com/optiline" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                            <a href="https://instagram.com/optiline" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                            <a href="https://linkedin.com/company/optiline" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section section-dark" id="next-steps">
-            <div class="container">
-                <div class="section-title anim-group">
-                    <h2>Our Onboarding Process</h2>
-                    <p>Our process is designed for seamless, collaborative engagement with our clientele.</p>
-                </div>
-                <div class="next-steps-timeline anim-group">
-                    <div class="step-item">
-                        <div class="step-number">1</div>
-                        <div class="step-content">
-                            <h4>Inquiry Review</h4>
-                            <p>Once you submit the form, our team reviews your message to fully understand your questions and goals.</p>
-                        </div>
-                    </div>
-                    <div class="step-item">
-                        <div class="step-number">2</div>
-                        <div class="step-content">
-                            <h4>Team Connection</h4>
-                            <p>We identify the best person in our collective to provide you with a comprehensive answer.</p>
-                        </div>
-                    </div>
-                    <div class="step-item">
-                        <div class="step-number">3</div>
-                        <div class="step-content">
-                            <h4>Guidance & Next Steps</h4>
-                            <p>We'll provide the information you need and, if applicable, discuss potential next steps for collaboration.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-    
-    <footer class="main-footer">
-        <div class="container footer-content">
-            <div class="footer-about">
-                <a href="/home/" class="logo"><img src="https://i.ibb.co/ZpvD9mSj/OPTILINE-LOGO.webp" loading="lazy" alt="OPTILINE Logo"></a>
-                <p>OPTILINE is a creative agency dedicated to building the brands of tomorrow. We partner with visionaries to create work that matters.</p>
-            </div>
-            <div class="footer-links">
-                <h4>Explore</h4><ul><li><a href="/home/">Home</a></li><li><a href="/services/">Services</a></li><li><a href="/portfolio/">Portfolio</a></li></ul>
-            </div>
-            <div class="footer-links">
-                <h4>Support</h4><ul><li><a href="/pricing/">Pricing</a></li><li><a href="/home/#process">Our Process</a></li><li><a href="/careers/">Careers</a></li></ul>
-            </div>
+        <!-- Honeypot -->
+        <div class="honeypot-field" aria-hidden="true">
+          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
         </div>
-        <div class="copyright"><p>© 2025 OPTILINE. A New Era of Creativity.</p></div>
-    </footer>
+        <div class="honeypot-field" aria-hidden="true">
+          <input type="text" id="honeypot" name="honeypot" value="expected-value" tabindex="-1" autocomplete="off">
+        </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    
-    <script src="../assets/js/main.js"></script>
+        <button type="submit" id="submit-button" class="cta-button" disabled>
+          <div class="submit-content">
+            <div class="loading-spinner" id="loading-spinner"></div>
+            <span id="submit-text">Submit Inquiry</span>
+          </div>
+        </button>
 
-    <!-- UPDATED CONTACT SCRIPT: integrates one-time token, honeypot, 2-minute throttle, and UI states -->
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // Replace with your deployed Web App URL if different
-        const CONTACT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyZy7CMOcoQrtkzltrSQEzCKww7_SyfOxsaNK1J31S0Qzkb9-uRfDAQ7EtSA2urPErA/exec";
+        <div class="form-messages">
+          <div id="form-success"></div>
+          <div id="form-error"></div>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
 
-        const form = document.getElementById('contact-form');
-        const submitButton = document.getElementById('submit-button');
-        const submitText = document.getElementById('submit-text');
-        const loadingSpinner = document.getElementById('loading-spinner');
-        const successMessage = document.getElementById('form-success');
-        const errorMessage = document.getElementById('form-error');
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const CONTACT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxhntVBOIV5hh4cVMfVIhJjxrMJfDayupZBHWeUwOls8FDkh6RPUYgsULeT9etNFJFa/exec"; // Replace with your deployed Apps Script URL
+  const form = document.getElementById("contact-form");
+  const submitButton = document.getElementById("submit-button");
+  const submitText = document.getElementById("submit-text");
+  const spinner = document.getElementById("loading-spinner");
+  const successMsg = document.getElementById("form-success");
+  const errorMsg = document.getElementById("form-error");
+  const websiteField = document.getElementById("website");
+  const honeypotField = document.getElementById("honeypot");
+  const CLIENT_LIMIT_KEY = "contact_last_sent_ts";
+  const COOLDOWN_MS = 120000;
+  let currentToken = "";
 
-        const nameInput = document.getElementById('name');
-        const messageInput = document.getElementById('message');
+  async function fetchToken() {
+    try {
+      const res = await fetch(CONTACT_WEBHOOK_URL + "?mode=getToken", { cache: "no-store" });
+      const data = await res.json();
+      if (data.status === "ok") {
+        currentToken = data.token;
+        submitButton.disabled = false;
+      }
+    } catch {
+      showError("Security initialization failed. Refresh the page.");
+    }
+  }
 
-        const websiteField = document.getElementById('website'); // honeypot visible only to bots
-        const honeypotField = document.getElementById('honeypot'); // expected-value field
+  fetchToken();
 
-        const CLIENT_RL_KEY = 'contact_last_sent_ts';
-        const MIN_SUBMISSION_INTERVAL = 120000; // 2 minutes in milliseconds
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    hideMessages();
 
-        let currentToken = ''; // one-time token fetched from Apps Script
+    const lastSent = localStorage.getItem(CLIENT_LIMIT_KEY);
+    if (lastSent && Date.now() - parseInt(lastSent, 10) < COOLDOWN_MS) {
+      showError("Please wait 2 minutes before sending another message.");
+      return;
+    }
 
-        // initialize counters
-        document.querySelectorAll('.char-counter').forEach(function(c){
-          if (c.textContent.trim() === '') c.textContent = '0/0';
-        });
-        // set proper initial counters
-        const nameCounter = nameInput ? nameInput.parentNode.querySelector('.char-counter') : null;
-        if (nameCounter) nameCounter.textContent = '0/100';
-        const msgCounter = messageInput ? messageInput.parentNode.querySelector('.char-counter') : null;
-        if (msgCounter) msgCounter.textContent = '0/1000';
+    if (websiteField.value.trim() !== "" || honeypotField.value.trim() !== "expected-value") {
+      showError("Security validation failed.");
+      return;
+    }
 
-        // Character counters
-        if (nameInput) {
-            nameInput.addEventListener('input', function() {
-                const counter = this.parentNode.querySelector('.char-counter');
-                if (counter) counter.textContent = `${this.value.length}/100`;
-            });
-        }
-        
-        if (messageInput) {
-            messageInput.addEventListener('input', function() {
-                const counter = this.parentNode.querySelector('.char-counter');
-                if (counter) counter.textContent = `${this.value.length}/1000`;
-            });
-        }
+    const telegram = document.getElementById("telegram").value.trim();
+    if (!/^(@[a-zA-Z0-9_]+|\+[0-9]+)$/.test(telegram)) {
+      showError("Enter a valid Telegram username or phone number.");
+      return;
+    }
 
-        // fetch initial token, enable submit when token present
-        (async function initToken(){
-          await fetchToken();
-          // as additional anti-bot: small delay before enabling if token present
-          if (currentToken) {
-            setTimeout(()=> { submitButton.disabled = false; }, 250);
-          } else {
-            // token failed: enable button so user can refresh or retry manually
-            setTimeout(()=> { submitButton.disabled = false; }, 1500);
-          }
-        })();
+    if (!currentToken) {
+      await fetchToken();
+      if (!currentToken) {
+        showError("Security token missing. Please refresh.");
+        return;
+      }
+    }
 
-        async function fetchToken(retries = 2) {
-          try {
-            const res = await fetch(CONTACT_WEBHOOK_URL + '?mode=getToken', { cache: 'no-store' });
-            if (!res.ok) throw new Error('Token endpoint error');
-            const json = await res.json();
-            if (json && json.status === 'ok' && json.token) {
-              currentToken = json.token;
-              return true;
-            } else {
-              throw new Error(json && json.message ? json.message : 'Invalid token response');
-            }
-          } catch (err) {
-            console.warn('fetchToken error:', err);
-            if (retries > 0) {
-              // small backoff
-              await new Promise(res => setTimeout(res, 700));
-              return fetchToken(retries - 1);
-            }
-            return false;
-          }
-        }
+    submitButton.disabled = true;
+    spinner.style.display = "inline-block";
+    submitText.textContent = "Submitting...";
 
-        form.addEventListener('submit', async function(e) {
-          e.preventDefault();
-          hideMessages();
+    const formData = new FormData(form);
+    formData.append("token", currentToken);
 
-          // client-side throttle check (localStorage)
-          const lastTs = localStorage.getItem(CLIENT_RL_KEY);
-          if (lastTs && (Date.now() - parseInt(lastTs,10) < MIN_SUBMISSION_INTERVAL)) {
-            const waitMs = MIN_SUBMISSION_INTERVAL - (Date.now() - parseInt(lastTs,10));
-            showError('Please wait 2 minutes before submitting again.');
-            return;
-          }
+    try {
+      const res = await fetch(CONTACT_WEBHOOK_URL, { method: "POST", body: formData });
+      const json = await res.json();
 
-          // honeypot validation
-          if ((websiteField && websiteField.value.trim() !== '') || (honeypotField && honeypotField.value.trim() !== 'expected-value')) {
-            showError('Security validation failed. Refresh the page and try again.');
-            return;
-          }
+      if (json.status === "ok") {
+        form.reset();
+        localStorage.setItem(CLIENT_LIMIT_KEY, Date.now().toString());
+        showSuccess(json.message || "Your message has been sent successfully. We will contact you shortly.");
+        startCooldown();
+        currentToken = "";
+        fetchToken();
+      } else {
+        throw new Error(json.message || "Submission failed.");
+      }
+    } catch (err) {
+      showError(err.message);
+      submitButton.disabled = false;
+    } finally {
+      spinner.style.display = "none";
+      submitText.textContent = "Submit Inquiry";
+    }
+  });
 
-          // basic client validation: telegram pattern
-          const telegram = document.getElementById('telegram').value || '';
-          const telegramRegex = /^(@[a-zA-Z0-9_]+|\+[0-9]+)$/;
-          if (!telegramRegex.test(telegram)) {
-            showError('Please enter a valid Telegram username (@username) or phone number (+1234567890).');
-            return;
-          }
+  function hideMessages() {
+    successMsg.style.display = "none";
+    errorMsg.style.display = "none";
+  }
 
-          // ensure token
-          if (!currentToken) {
-            const ok = await fetchToken();
-            if (!ok || !currentToken) {
-              showError('Security initialization failed. Reload the page and try again.');
-              return;
-            }
-          }
+  function showSuccess(msg) {
+    successMsg.textContent = msg;
+    successMsg.style.display = "block";
+    errorMsg.style.display = "none";
+  }
 
-          // UI: show loading
-          submitButton.disabled = true;
-          loadingSpinner.style.display = 'inline-block';
-          submitText.textContent = 'Submitting...';
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.style.display = "block";
+    successMsg.style.display = "none";
+  }
 
-          // build form data including token
-          const fd = new FormData(form);
-          fd.append('token', currentToken);
-          // optional: include user agent and timestamp for server logs
-          fd.append('userAgent', navigator.userAgent);
-          fd.append('ts', new Date().toISOString());
-
-          try {
-            const resp = await fetch(CONTACT_WEBHOOK_URL, {
-              method: 'POST',
-              body: fd,
-              // do not set content-type — browser will set multipart/form-data boundary
-            });
-
-            const json = await resp.json();
-
-            // server returns {status: 'ok', ...}
-            if (json && (json.status === 'ok' || json.status === 'success')) {
-              // success
-              form.reset();
-              localStorage.setItem(CLIENT_RL_KEY, Date.now().toString());
-              showSuccess('Your message has been sent successfully. We will contact you shortly.');
-              startLocalCooldown();
-              // prepare new token for next submission
-              currentToken = '';
-              fetchToken().catch(()=>{});
-            } else {
-              // server returned an error
-              const message = (json && json.message) ? json.message : 'Server rejected the submission.';
-              throw new Error(message);
-            }
-          } catch (err) {
-            console.error('Submit error:', err);
-            showError(err.message || 'Submission failed. Try again later.');
-            submitButton.disabled = false;
-          } finally {
-            loadingSpinner.style.display = 'none';
-            submitText.textContent = 'Submit Inquiry';
-          }
-        });
-
-        function startLocalCooldown() {
-          let remaining = 120;
-          submitButton.disabled = true;
-          const iv = setInterval(() => {
-            submitText.textContent = `Wait ${remaining}s`;
-            remaining--;
-            if (remaining <= 0) {
-              clearInterval(iv);
-              submitText.textContent = 'Submit Inquiry';
-              submitButton.disabled = false;
-            }
-          }, 1000);
-        }
-
-        function hideMessages() {
-          successMessage.style.display = 'none';
-          errorMessage.style.display = 'none';
-        }
-
-        function showSuccess(msg) {
-          successMessage.textContent = msg;
-          successMessage.style.display = 'block';
-          errorMessage.style.display = 'none';
-        }
-
-        function showError(msg) {
-          errorMessage.textContent = msg;
-          errorMessage.style.display = 'block';
-          successMessage.style.display = 'none';
-        }
-
-        // Prevent Enter from submitting unexpectedly: move focus instead
-        form.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter' && e.target.tagName.toLowerCase() !== 'textarea') {
-            const focusable = Array.from(form.querySelectorAll('input, textarea, button')).filter(el => !el.disabled && el.type !== 'hidden');
-            const idx = focusable.indexOf(document.activeElement);
-            if (idx >= 0) {
-              const next = focusable[(idx + 1) % focusable.length];
-              if (next && next !== submitButton) {
-                next.focus();
-                e.preventDefault();
-              }
-            }
-          }
-        });
-
-      });
-    </script>
-
+  function startCooldown() {
+    let remaining = 120;
+    const timer = setInterval(() => {
+      submitText.textContent = `Wait ${remaining}s`;
+      remaining--;
+      if (remaining <= 0) {
+        clearInterval(timer);
+        submitText.textContent = "Submit Inquiry";
+        submitButton.disabled = false;
+      }
+    }, 1000);
+  }
+});
+</script>
 </body>
 </html>
