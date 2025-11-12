@@ -58,6 +58,13 @@
         .form-group.hidden {
             display: none;
         }
+        .countdown-timer {
+            color: var(--accent-light);
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -94,8 +101,8 @@
                         <h2>Project Inquiry</h2>
                         
                         <!-- Token Status Display -->
-                        <div id="token-status" class="token-status">
-                            <i class="fas fa-sync-alt fa-spin"></i> <span id="token-message">Preparing secure connection...</span>
+                        <div id="token-status" class="token-status" style="display: none;">
+                            <span id="token-message"></span>
                         </div>
                         
                         <div class="form-group"><label for="name">Full Name</label><input type="text" id="name" name="name" required></div>
@@ -123,6 +130,11 @@
 
                         <div class="form-submit-container">
                             <button type="submit" class="cta-button" id="submit-button" disabled>Preparing Secure Connection...</button>
+                            
+                            <!-- Countdown Timer -->
+                            <div id="countdown-timer" class="countdown-timer">
+                                You can submit another inquiry in: <span id="countdown-display">120</span> seconds
+                            </div>
                             
                             <div class="form-messages">
                                 <div id="form-success" style="display: none; color: var(--accent-light); text-align: center; margin-top: 15px; padding: 15px; background: rgba(0,255,0,0.1); border-radius: 5px; font-weight: bold;">Thank you! Your inquiry has been sent.</div>
@@ -212,13 +224,37 @@
             const submitButton = document.getElementById('submit-button');
             const successMessage = document.getElementById('form-success');
             const errorMessage = document.getElementById('form-error');
+            const countdownTimer = document.getElementById('countdown-timer');
+            const countdownDisplay = document.getElementById('countdown-display');
+
+            let countdownInterval = null;
+            const COUNTDOWN_DURATION = 120; // 120 seconds
+
+            // Function to start countdown
+            function startCountdown() {
+                let timeLeft = COUNTDOWN_DURATION;
+                countdownTimer.style.display = 'block';
+                countdownDisplay.textContent = timeLeft;
+                
+                countdownInterval = setInterval(() => {
+                    timeLeft--;
+                    countdownDisplay.textContent = timeLeft;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(countdownInterval);
+                        countdownTimer.style.display = 'none';
+                        submitButton.disabled = false;
+                        submitButton.style.display = 'block';
+                        submitButton.textContent = 'Submit Inquiry';
+                        getToken(); // Get new token after countdown
+                    }
+                }, 1000);
+            }
 
             // Function to get a new token
             async function getToken() {
                 try {
-                    tokenStatus.className = 'token-status token-loading';
-                    tokenStatus.style.display = 'block';
-                    tokenMessage.textContent = 'Preparing secure connection...';
+                    tokenStatus.style.display = 'none'; // Hide token status completely
                     
                     const response = await fetch(CONTACT_WEBHOOK_URL + '?mode=getToken', {
                         method: 'GET',
@@ -233,8 +269,6 @@
 
                     if (result.status === 'ok' && result.token) {
                         tokenField.value = result.token;
-                        tokenStatus.className = 'token-status token-valid';
-                        tokenMessage.innerHTML = '<i class="fas fa-check-circle"></i> Secure connection established';
                         submitButton.disabled = false;
                         submitButton.textContent = 'Submit Inquiry';
                     } else {
@@ -242,8 +276,6 @@
                     }
                 } catch (err) {
                     console.error('Token Error:', err);
-                    tokenStatus.className = 'token-status token-invalid';
-                    tokenMessage.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Security connection failed';
                     submitButton.disabled = true;
                     submitButton.textContent = 'Connection Failed - Refresh Page';
                     
@@ -284,8 +316,8 @@
                             submitButton.style.display = 'none';
                             successMessage.style.display = 'block';
                             
-                            // Get a new token for next submission
-                            setTimeout(getToken, 2000);
+                            // Start countdown after successful submission
+                            startCountdown();
                         } else {
                             throw new Error(result.message || 'Unknown error from script.');
                         }
