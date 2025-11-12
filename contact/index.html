@@ -31,6 +31,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="../assets/css/style.css">
+    
+    <style>
+        .token-status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            display: none;
+        }
+        .token-valid {
+            background: rgba(0, 255, 0, 0.1);
+            color: var(--accent-light);
+            border: 1px solid var(--accent-light);
+        }
+        .token-invalid {
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+        }
+        .token-loading {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+            border: 1px solid #ffc107;
+        }
+        .form-group.hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <div class="custom-cursor"></div>
@@ -64,6 +92,12 @@
                     
                     <form class="contact-form" name="contact" method="POST" id="contact-form">
                         <h2>Project Inquiry</h2>
+                        
+                        <!-- Token Status Display -->
+                        <div id="token-status" class="token-status">
+                            <i class="fas fa-sync-alt fa-spin"></i> <span id="token-message">Preparing secure connection...</span>
+                        </div>
+                        
                         <div class="form-group"><label for="name">Full Name</label><input type="text" id="name" name="name" required></div>
                         <div class="form-group"><label for="email">Email Address</label><input type="email" id="email" name="email" required></div>
                         
@@ -76,13 +110,19 @@
                             <textarea id="message" name="message" required placeholder="Tell us what's on your mind or what you'd like to discuss..."></textarea>
                         </div>
                         
+                        <!-- Hidden Token Field -->
+                        <div class="form-group hidden">
+                            <input type="hidden" id="token" name="token">
+                        </div>
+                        
+                        <!-- Honeypot Field -->
                         <div style="display:none;" aria-hidden="true">
                             <label>Don't fill this out if you're human:</label>
                             <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
                         </div>
 
                         <div class="form-submit-container">
-                            <button type="submit" class="cta-button" id="submit-button">Submit Inquiry</button>
+                            <button type="submit" class="cta-button" id="submit-button" disabled>Preparing Secure Connection...</button>
                             
                             <div class="form-messages">
                                 <div id="form-success" style="display: none; color: var(--accent-light); text-align: center; margin-top: 15px; padding: 15px; background: rgba(0,255,0,0.1); border-radius: 5px; font-weight: bold;">Thank you! Your inquiry has been sent.</div>
@@ -162,57 +202,109 @@
     <script src="../assets/js/main.js"></script>
 
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const CONTACT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxhOKGi91ah2Uf4vqAzkM83ABaWtR-runXRQOnEV-VWNlf7ODB1mEb15w8rKwvkgw/exec";
-        
-        const form = document.getElementById('contact-form');
-        if (form) {
-          form.addEventListener('submit', async (e) => {
-            e.preventDefault(); 
-
+        document.addEventListener('DOMContentLoaded', function() {
+            const CONTACT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxDKjnAT7pNWJbZFai7I0XFJOoLaqp07txNo70n47pz6n6Dt0mRNzYc4M9QTcA1oFeI/exec";
+            
+            const form = document.getElementById('contact-form');
+            const tokenField = document.getElementById('token');
+            const tokenStatus = document.getElementById('token-status');
+            const tokenMessage = document.getElementById('token-message');
             const submitButton = document.getElementById('submit-button');
             const successMessage = document.getElementById('form-success');
             const errorMessage = document.getElementById('form-error');
 
-            successMessage.style.display = 'none';
-            errorMessage.style.display = 'none';
-            
-            submitButton.textContent = 'Submitting...';
-            submitButton.disabled = true;
+            // Function to get a new token
+            async function getToken() {
+                try {
+                    tokenStatus.className = 'token-status token-loading';
+                    tokenStatus.style.display = 'block';
+                    tokenMessage.textContent = 'Preparing secure connection...';
+                    
+                    const response = await fetch(CONTACT_WEBHOOK_URL + '?mode=getToken', {
+                        method: 'GET',
+                        mode: 'cors'
+                    });
 
-            const formData = new FormData(form);
-            const payload = new URLSearchParams(formData);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
 
-            try {
-              const response = await fetch(CONTACT_WEBHOOK_URL, {
-                method: 'POST',
-                body: payload,
-                mode: 'cors' 
-              });
-
-              if (!response.ok) {
-                  throw new Error(`HTTP error! status: ${response.status}`);
-              }
-              
-              const result = await response.json();
-
-              if (result.status === 'ok') {
-                form.reset(); 
-                submitButton.style.display = 'none';
-                successMessage.style.display = 'block';
-              } else {
-                throw new Error(result.message || 'Unknown error from script.');
-              }
-            } catch (err) {
-              console.error('Contact Form Error:', err);
-              errorMessage.textContent = err.message; 
-              errorMessage.style.display = 'block';
-              submitButton.textContent = 'Submit Inquiry';
-              submitButton.disabled = false;
+                    if (result.status === 'ok' && result.token) {
+                        tokenField.value = result.token;
+                        tokenStatus.className = 'token-status token-valid';
+                        tokenMessage.innerHTML = '<i class="fas fa-check-circle"></i> Secure connection established';
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Submit Inquiry';
+                    } else {
+                        throw new Error('Failed to get security token');
+                    }
+                } catch (err) {
+                    console.error('Token Error:', err);
+                    tokenStatus.className = 'token-status token-invalid';
+                    tokenMessage.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Security connection failed';
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Connection Failed - Refresh Page';
+                    
+                    // Retry after 5 seconds
+                    setTimeout(getToken, 5000);
+                }
             }
-          });
-        }
-      });
+
+            // Form submission handler
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault(); 
+
+                    successMessage.style.display = 'none';
+                    errorMessage.style.display = 'none';
+                    
+                    submitButton.textContent = 'Submitting...';
+                    submitButton.disabled = true;
+
+                    const formData = new FormData(form);
+                    const payload = new URLSearchParams(formData);
+
+                    try {
+                        const response = await fetch(CONTACT_WEBHOOK_URL, {
+                            method: 'POST',
+                            body: payload,
+                            mode: 'cors' 
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const result = await response.json();
+
+                        if (result.status === 'ok') {
+                            form.reset(); 
+                            submitButton.style.display = 'none';
+                            successMessage.style.display = 'block';
+                            
+                            // Get a new token for next submission
+                            setTimeout(getToken, 2000);
+                        } else {
+                            throw new Error(result.message || 'Unknown error from script.');
+                        }
+                    } catch (err) {
+                        console.error('Contact Form Error:', err);
+                        errorMessage.textContent = err.message; 
+                        errorMessage.style.display = 'block';
+                        submitButton.textContent = 'Submit Inquiry';
+                        submitButton.disabled = false;
+                        
+                        // Refresh token on error
+                        getToken();
+                    }
+                });
+            }
+
+            // Initialize token when page loads
+            getToken();
+        });
     </script>
 
 </body>
